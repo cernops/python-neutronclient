@@ -226,6 +226,10 @@ class Client(object):
     firewall_path = "/fw/firewalls/%s"
     net_partitions_path = "/net-partitions"
     net_partition_path = "/net-partitions/%s"
+    clusters_path = "/clusters"
+    cluster_path = "/clusters/%s"
+    cluster_insert_path = "/clusters/%s/insert_subnet"
+    cluster_remove_path = "/clusters/%s/remove_subnet"
 
     # API has no way to report plurals, so we have to hard code them
     EXTED_PLURALS = {'routers': 'router',
@@ -267,6 +271,42 @@ class Client(object):
         return {'plurals': self.EXTED_PLURALS,
                 'xmlns': constants.XML_NS_V20,
                 constants.EXT_NS: ns}
+
+    @APIParamsCall
+    def cluster_insert_subnet(self, cluster, body=None):
+        """Inserts specified subnet into cluster."""
+        return self.put(self.cluster_insert_path % (cluster), body=body)
+
+    @APIParamsCall
+    def cluster_remove_subnet(self, cluster, body=None):
+        """Removes specified subnet from cluster."""
+        return self.put(self.cluster_remove_path % (cluster), body=body)
+
+    @APIParamsCall
+    def list_clusters(self, retrieve_all=True, **_params):
+        """Fetches a list of all clusters."""
+        return self.list('clusters', self.clusters_path, retrieve_all,
+                         **_params)
+
+    @APIParamsCall
+    def show_cluster(self, cluster, **_params):
+        """Fetch information of a certain cluster."""
+        return self.get(self.cluster_path % (cluster), params=_params)
+
+    @APIParamsCall
+    def create_cluster(self, body=None):
+        """Creates a new cluster."""
+        return self.post(self.clusters_path, body=body)
+
+    @APIParamsCall
+    def update_cluster(self, cluster, body=None):
+        """Update a cluster."""
+        return self.put(self.cluster_path % (cluster), body=body)
+
+    @APIParamsCall
+    def delete_cluster(self, cluster):
+        """Delete the specified cluster."""
+        return self.delete(self.cluster_path % (cluster))
 
     @APIParamsCall
     def get_quotas_tenant(self, **_params):

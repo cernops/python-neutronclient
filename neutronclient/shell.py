@@ -71,6 +71,7 @@ from neutronclient.neutron.v2_0.vpn import vpnservice
 from neutronclient.openstack.common.gettextutils import _
 from neutronclient.openstack.common import strutils
 from neutronclient.version import __version__
+from neutronclient.neutron.v2_0 import cluster
 
 
 VERSION = '2.0'
@@ -295,6 +296,13 @@ COMMAND_V2 = {
     'nec-packet-filter-create': packetfilter.CreatePacketFilter,
     'nec-packet-filter-update': packetfilter.UpdatePacketFilter,
     'nec-packet-filter-delete': packetfilter.DeletePacketFilter,
+    'cluster-list': cluster.ListCluster,
+    'cluster-show': cluster.ShowCluster,
+    'cluster-create': cluster.CreateCluster,
+    'cluster-update': cluster.UpdateCluster,
+    'cluster-delete': cluster.DeleteCluster,
+    'cluster-insert-subnet': cluster.AddSubnet,
+    'cluster-remove-subnet': cluster.RemoveSubnet,
 }
 
 COMMANDS = {'2.0': COMMAND_V2}
