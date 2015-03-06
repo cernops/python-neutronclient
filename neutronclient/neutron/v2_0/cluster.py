@@ -29,15 +29,60 @@ def updatable_args2body(parsed_args, body, for_create=True):
     if parsed_args.name:
         body['cluster'].update({'name': parsed_args.name})
 
+def _format_subnets(network):
+    try:
+        return '\n'.join([' '.join([s['id'], s.get('cidr', '')])
+                          for s in network['subnets']])
+    except Exception:
+        return ''
 
 class ListCluster(neutronV20.ListCommand):
     """List clusters."""
 
     resource = 'cluster'
-    _formatters = { }
-    list_columns = ['id', 'name']
+    _formatters = {'subnets': _format_subnets, }
+    list_columns = ['id', 'name', 'subnets']
     pagination_support = True
     sorting_support = True
+
+    def extend_list(self, data, parsed_args):
+        """Add subnet information to a network list."""
+        neutron_client = self.get_client()
+        search_opts = {'fields': ['id', 'cidr']}
+        if self.pagination_support:
+            page_size = parsed_args.page_size
+            if page_size:
+                search_opts.update({'limit': page_size})
+        subnet_ids = []
+        for n in data:
+            if 'subnets' in n:
+                subnet_ids.extend(n['subnets'])
+
+        def _get_subnet_list(sub_ids):
+            search_opts['id'] = sub_ids
+            return neutron_client.list_subnets(
+                **search_opts).get('subnets', [])
+
+        try:
+            subnets = _get_subnet_list(subnet_ids)
+        except exceptions.RequestURITooLong as uri_len_exc:
+            # The URI is too long because of too many subnet_id filters
+            # Use the excess attribute of the exception to know how many
+            # subnet_id filters can be inserted into a single request
+            subnet_count = len(subnet_ids)
+            max_size = ((self.subnet_id_filter_len * subnet_count) -
+                        uri_len_exc.excess)
+            chunk_size = max_size / self.subnet_id_filter_len
+            subnets = []
+            for i in range(0, subnet_count, chunk_size):
+                subnets.extend(
+                    _get_subnet_list(subnet_ids[i: i + chunk_size]))
+
+        subnet_dict = dict([(s['id'], s) for s in subnets])
+        for n in data:
+            if 'subnets' in n:
+                n['subnets'] = [(subnet_dict.get(s) or {"id": s})
+                                for s in n['subnets']]
 
 
 class ShowCluster(neutronV20.ShowCommand):
