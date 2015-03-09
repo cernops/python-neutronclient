@@ -72,7 +72,7 @@ from neutronclient.openstack.common.gettextutils import _
 from neutronclient.openstack.common import strutils
 from neutronclient.version import __version__
 from neutronclient.neutron.v2_0 import cluster
-
+from neutronclient.neutron.v2_0 import hostrestrictions
 
 VERSION = '2.0'
 NEUTRON_API_VERSION = '2.0'
@@ -303,6 +303,7 @@ COMMAND_V2 = {
     'cluster-delete': cluster.DeleteCluster,
     'cluster-insert-subnet': cluster.AddSubnet,
     'cluster-remove-subnet': cluster.RemoveSubnet,
+    'host-restrictions-show': hostrestrictions.ShowHost,
 }
 
 COMMANDS = {'2.0': COMMAND_V2}
