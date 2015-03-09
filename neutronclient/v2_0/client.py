@@ -431,6 +431,7 @@ class Client(ClientBase):
     cluster_path = "/clusters/%s"
     cluster_insert_path = "/clusters/%s/insert_subnet"
     cluster_remove_path = "/clusters/%s/remove_subnet"
+    host_path = "/hosts/%s"
 
     # API has no way to report plurals, so we have to hard code them
     EXTED_PLURALS = {'routers': 'router',
@@ -493,6 +494,11 @@ class Client(ClientBase):
         """Client extension hook for deletes.
         """
         return self.delete(path % id)
+
+    @APIParamsCall
+    def show_host(self, hostname, **_params):
+        """Fetch information of a certain host."""
+        return self.get(self.host_path % (hostname), params=_params)
 
     @APIParamsCall
     def cluster_insert_subnet(self, cluster, body=None):
